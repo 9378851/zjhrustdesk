@@ -257,6 +257,7 @@ jobs:
         run: |
           sed -i 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["zjhrust.wt20.top"];#' libs/hbb_common/src/config.rs
           sed -i 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=";#' libs/hbb_common/src/config.rs
+          sed -i 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' libs/hbb_common/src/config.rs
           grep -n "RENDEZVOUS_SERVERS\|RS_PUB_KEY" libs/hbb_common/src/config.rs
       - name: Replace engine with rustdesk custom flutter engine
         if: ${{ matrix.job.arch == 'x86_64' }}
