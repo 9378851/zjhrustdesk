@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# ============================================================
+# 维巧远程 定制补丁（全平台通用：Windows / macOS / iOS / Android）
+# 作用：注入信令服务器、中继 Key、应用名「维巧远程」，并隐藏两处官方提示
+# 特性：幂等（重复执行无副作用）；自动适配 GNU sed（Linux）与 BSD sed（macOS）
+# 用法：在任意 job 的 steps 中加  - run: bash .github/patch-custom.sh
+# ============================================================
+set -euo pipefail
+
+# 切到仓库根目录（本脚本位于 .github/ 下）
+cd "$(dirname "$0")/.."
+
+# 兼容 GNU sed（Linux runner）与 BSD sed（macOS runner）
+sedi() {
+  if sed --version >/dev/null 2>&1; then
+    sed -i "$@"
+  else
+    sed -i '' "$@"
+  fi
+}
+
+CONFIG=libs/hbb_common/src/config.rs
+COMMON=flutter/lib/common.dart
+CONN=flutter/lib/desktop/pages/connection_page.dart
+PLATFORM=src/platform/mod.rs
+
+# 1) 信令/中继服务器
+sedi 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["zjhrust.wt20.top"];#' "$CONFIG"
+
+# 2) 公钥（客户端 Key）
+sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=";#' "$CONFIG"
+
+# 3) 应用名（同时决定安装目录/服务名）
+sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' "$CONFIG"
+
+# 4) 放行中文应用名（官方限制安装名只能含 ASCII 字母，中文会报错）
+sedi 's#^    if !valid_first#    if false \&\& !valid_first#' "$PLATFORM"
+
+# 5) 隐藏「由 RustDesk 提供支持」
+sedi 's#if (bind.mainGetBuildinOption(key: .hide-powered-by-me.) == .Y.) {#if (true) {#' "$COMMON"
+
+# 6) 隐藏底部「…你可以选择自建服务器」提示
+sedi 's#final _svcIsUsingPublicServer = true.obs;#final _svcIsUsingPublicServer = false.obs;#' "$CONN"
+sedi 's#_svcIsUsingPublicServer.value = await bind.mainIsUsingPublicServer();#_svcIsUsingPublicServer.value = false;#' "$CONN"
+
+# ============================================================
+# 校验：输出注入结果，任何一项没命中都让构建失败
+# ============================================================
+echo '----- config.rs (服务器 / Key / 应用名) -----'
+grep -nE 'RENDEZVOUS_SERVERS|RS_PUB_KEY|APP_NAME' "$CONFIG"
+
+echo '----- 隐藏官方提示（common.dart 应出现 if (true)）-----'
+grep -n 'if (true) {' "$COMMON" || echo 'WARN: 未找到 if (true)，hide-powered-by-me 补丁可能未命中（不中断构建）'
+
+echo '----- 隐藏底部自建服务器提示 -----'
+grep -nE '_svcIsUsingPublicServer' "$CONN"
+
+echo '----- 放行中文应用名 -----'
+grep -n 'if false' "$PLATFORM"
+
+# 强校验：核心三项必须命中，否则中断构建（避免产出连不上服务器的包）
+grep -q 'zjhrust.wt20.top' "$CONFIG" || { echo 'ERROR: 服务器注入失败'; exit 1; }
+grep -q '67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
+grep -q '维巧远程' "$CONFIG" || { echo 'ERROR: 应用名注入失败'; exit 1; }
+
+echo 'PATCH OK'
