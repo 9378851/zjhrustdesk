@@ -96,6 +96,7 @@ jobs:
 
   generate-sbom:
     needs: [validate-update-metadata-keys]
+    if: false
     runs-on: ubuntu-latest
 
     permissions:
@@ -1825,6 +1826,7 @@ jobs:
 
   build-rustdesk-linux:
     needs: [generate-bridge]
+    if: false
     name: build rustdesk linux ${{ matrix.job.target }}
     runs-on: ${{ matrix.job.on }}
     strategy:
@@ -2174,6 +2176,7 @@ jobs:
   # flatpak need that job, and a failure here must not skip them.
   build-rustdesk-linux-drm:
     needs: [generate-bridge]
+    if: false
     name: build rustdesk linux drm x86_64
     runs-on: ubuntu-22.04
     steps:
@@ -2494,6 +2497,7 @@ jobs:
   build-rustdesk-linux-sciter:
     if: ${{ inputs.upload-artifact }}
     needs: [validate-update-metadata-keys]
+    if: false
     runs-on: ${{ matrix.job.on }}
     name: build-rustdesk-linux-sciter ${{ matrix.job.target }}
     strategy:
@@ -2736,6 +2740,7 @@ jobs:
 
   build-appimage:
     name: Build appimage ${{ matrix.job.target }}
+    if: false
     needs: [build-rustdesk-linux]
     runs-on: ubuntu-22.04
     if: ${{ inputs.upload-artifact }}
@@ -2789,6 +2794,7 @@ jobs:
 
   build-flatpak:
     name: Build flatpak ${{ matrix.job.target }}${{ matrix.job.suffix }}
+    if: false
     needs:
       - build-rustdesk-linux
       - build-rustdesk-linux-sciter
