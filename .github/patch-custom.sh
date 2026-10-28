@@ -34,7 +34,9 @@ sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZ
 sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' "$CONFIG"
 
 # 4) 放行中文应用名（官方限制安装名只能含 ASCII 字母，中文会报错）
+#    两行都要短路：条件跨两行，且 Rust 中 && 优先级高于 ||
 sedi 's#^    if !valid_first#    if false \&\& !valid_first#' "$PLATFORM"
+sedi "s#^        || !bytes.all.*#        || false#" "$PLATFORM"
 
 # 5) 隐藏「由 RustDesk 提供支持」
 sedi 's#if (bind.mainGetBuildinOption(key: .hide-powered-by-me.) == .Y.) {#if (true) {#' "$COMMON"
