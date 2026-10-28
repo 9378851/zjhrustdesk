@@ -971,7 +971,19 @@ jobs:
           if [[ "3.24.5" == ${{env.FLUTTER_VERSION}} ]]; then
             git apply ${{ github.workspace }}/.github/patches/flutter_3.24.4_dropdown_menu_enableFilter.diff
           fi
-
+      - name: Patch custom server and key (macOS)
+        shell: bash
+        run: |
+          sed -i '' 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["zjhrust.wt20.top"];#' libs/hbb_common/src/config.rs
+          sed -i '' 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=";#' libs/hbb_common/src/config.rs
+          sed -i '' 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' libs/hbb_common/src/config.rs
+          sed -i '' 's#^    if !valid_first#    if false \&\& !valid_first#' src/platform/mod.rs
+          sed -i '' 's#if (bind.mainGetBuildinOption(key: .hide-powered-by-me.) == .Y.) {#if (true) {#' flutter/lib/common.dart
+          sed -i '' 's#final _svcIsUsingPublicServer = true.obs;#final _svcIsUsingPublicServer = false.obs;#' flutter/lib/desktop/pages/connection_page.dart
+          sed -i '' 's#_svcIsUsingPublicServer.value = await bind.mainIsUsingPublicServer();#_svcIsUsingPublicServer.value = false;#' flutter/lib/desktop/pages/connection_page.dart
+          grep -n "RENDEZVOUS_SERVERS\|RS_PUB_KEY\|APP_NAME" libs/hbb_common/src/config.rs
+          grep -n "hide-powered-by-me\|_svcIsUsingPublicServer" flutter/lib/common.dart flutter/lib/desktop/pages/connection_page.dart
+          grep -n "if false" src/platform/mod.rs
       - name: Workaround for flutter issue
         shell: bash
         run: |
