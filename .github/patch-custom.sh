@@ -33,6 +33,11 @@ sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZ
 # 3) 应用名（同时决定安装目录/服务名）
 sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' "$CONFIG"
 
+# 3b) 让客户端自动推导 API 服务器 = http://<域名>:21114
+#     默认 PROD_RENDEZVOUS_SERVER 是空串（config.rs L70），会导致
+#     登录/通讯录请求兜底打到官方 https://admin.rustdesk.com，用自建账号必然登不上
+sedi '/pub static ref PROD_RENDEZVOUS_SERVER/ s#RwLock::new("".to_owned())#RwLock::new("zjhrust.wt20.top".to_owned())#' "$CONFIG"
+
 # 4) 放行中文应用名（官方限制安装名只能含 ASCII 字母，中文会报错）
 #    两行都要短路：条件跨两行，且 Rust 中 && 优先级高于 ||
 sedi 's#^    if !valid_first#    if false \&\& !valid_first#' "$PLATFORM"
@@ -55,7 +60,7 @@ sedi 's#_svcIsUsingPublicServer.value = await bind.mainIsUsingPublicServer();#_s
 # 校验：输出注入结果，任何一项没命中都让构建失败
 # ============================================================
 echo '----- config.rs (服务器 / Key / 应用名) -----'
-grep -nE 'RENDEZVOUS_SERVERS|RS_PUB_KEY|APP_NAME' "$CONFIG"
+grep -nE 'RENDEZVOUS_SERVERS|RS_PUB_KEY|APP_NAME|PROD_RENDEZVOUS_SERVER' "$CONFIG"
 
 echo '----- 隐藏官方提示（common.dart 应出现 if (true)）-----'
 grep -n 'if (true) {' "$COMMON" || echo 'WARN: 未找到 if (true)，hide-powered-by-me 补丁可能未命中（不中断构建）'
@@ -70,5 +75,6 @@ grep -n 'if false' "$PLATFORM"
 grep -q 'zjhrust.wt20.top' "$CONFIG" || { echo 'ERROR: 服务器注入失败'; exit 1; }
 grep -q '67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
 grep -q '维巧远程' "$CONFIG" || { echo 'ERROR: 应用名注入失败'; exit 1; }
+grep -q 'PROD_RENDEZVOUS_SERVER: RwLock<String> = RwLock::new("zjhrust.wt20.top"' "$CONFIG" || { echo 'ERROR: API 自动推导(PROD_RENDEZVOUS_SERVER)注入失败'; exit 1; }
 
 echo 'PATCH OK'
