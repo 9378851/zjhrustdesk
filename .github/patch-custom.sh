@@ -25,10 +25,10 @@ CONN=flutter/lib/desktop/pages/connection_page.dart
 PLATFORM=src/platform/mod.rs
 
 # 1) 信令/中继服务器
-sedi 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["zjhrust.wt20.top"];#' "$CONFIG"
+sedi 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["disk.wt20.top"];#' "$CONFIG"
 
 # 2) 公钥（客户端 Key）
-sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=";#' "$CONFIG"
+sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "zjh9378851";#' "$CONFIG"
 
 # 3) 应用名（同时决定安装目录/服务名）
 sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' "$CONFIG"
@@ -36,7 +36,7 @@ sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned()
 # 3b) 让客户端自动推导 API 服务器 = http://<域名>:21114
 #     默认 PROD_RENDEZVOUS_SERVER 是空串（config.rs L70），会导致
 #     登录/通讯录请求兜底打到官方 https://admin.rustdesk.com，用自建账号必然登不上
-sedi '/pub static ref PROD_RENDEZVOUS_SERVER/ s#RwLock::new("".to_owned())#RwLock::new("zjhrust.wt20.top".to_owned())#' "$CONFIG"
+sedi '/pub static ref PROD_RENDEZVOUS_SERVER/ s#RwLock::new("".to_owned())#RwLock::new("disk.wt20.top".to_owned())#' "$CONFIG"
 
 # 4) 放行中文应用名（官方限制安装名只能含 ASCII 字母，中文会报错）
 #    两行都要短路：条件跨两行，且 Rust 中 && 优先级高于 ||
@@ -72,9 +72,9 @@ echo '----- 放行中文应用名 -----'
 grep -n 'if false' "$PLATFORM"
 
 # 强校验：核心三项必须命中，否则中断构建（避免产出连不上服务器的包）
-grep -q 'zjhrust.wt20.top' "$CONFIG" || { echo 'ERROR: 服务器注入失败'; exit 1; }
-grep -q '67sVkolrsBGx3DgXZRcmDGKIQLNaPNIpTW2gbFHEZEA=' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
+grep -q 'disk.wt20.top' "$CONFIG" || { echo 'ERROR: 服务器注入失败'; exit 1; }
+grep -q 'RS_PUB_KEY: &str = "zjh9378851"' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
 grep -q '维巧远程' "$CONFIG" || { echo 'ERROR: 应用名注入失败'; exit 1; }
-grep -q 'PROD_RENDEZVOUS_SERVER: RwLock<String> = RwLock::new("zjhrust.wt20.top"' "$CONFIG" || { echo 'ERROR: API 自动推导(PROD_RENDEZVOUS_SERVER)注入失败'; exit 1; }
+grep -q 'PROD_RENDEZVOUS_SERVER: RwLock<String> = RwLock::new("disk.wt20.top"' "$CONFIG" || { echo 'ERROR: API 自动推导(PROD_RENDEZVOUS_SERVER)注入失败'; exit 1; }
 
 echo 'PATCH OK'
