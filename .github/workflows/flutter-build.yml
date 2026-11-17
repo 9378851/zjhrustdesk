@@ -254,7 +254,7 @@ jobs:
         shell: bash
         run: |
           sed -i 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["rust.wt20.top"];#' libs/hbb_common/src/config.rs
-          sed -i 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "zjh9378851";#' libs/hbb_common/src/config.rs
+          sed -i 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "ENXMLoBSWEQJJt0/LSggQ2UE3fSmzVJvfxd0t5Gpkyc=";#' libs/hbb_common/src/config.rs
           sed -i 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' libs/hbb_common/src/config.rs
           sed -i '/pub static ref PROD_RENDEZVOUS_SERVER/ s#RwLock::new("".to_owned())#RwLock::new("rust.wt20.top".to_owned())#' libs/hbb_common/src/config.rs
           sed -i 's#^    if !valid_first#    if false \&\& !valid_first#' src/platform/mod.rs
@@ -974,7 +974,7 @@ jobs:
         shell: bash
         run: |
           sed -i '' 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["rust.wt20.top"];#' libs/hbb_common/src/config.rs
-          sed -i '' 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "zjh9378851";#' libs/hbb_common/src/config.rs
+          sed -i '' 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "ENXMLoBSWEQJJt0/LSggQ2UE3fSmzVJvfxd0t5Gpkyc=";#' libs/hbb_common/src/config.rs
           sed -i '' 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' libs/hbb_common/src/config.rs
           sed -i '' '/pub static ref PROD_RENDEZVOUS_SERVER/ s#RwLock::new("".to_owned())#RwLock::new("rust.wt20.top".to_owned())#' libs/hbb_common/src/config.rs
           sed -i '' 's#^    if !valid_first#    if false \&\& !valid_first#' src/platform/mod.rs
