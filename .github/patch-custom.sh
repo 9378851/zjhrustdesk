@@ -28,7 +28,7 @@ PLATFORM=src/platform/mod.rs
 sedi 's#^pub const RENDEZVOUS_SERVERS.*#pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["rust.wt20.top"];#' "$CONFIG"
 
 # 2) 公钥（客户端 Key）
-sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "ENXMLoBSWEQJJt0/LSggQ2UE3fSmzVJvfxd0t5Gpkyc=";#' "$CONFIG"
+sedi 's#^pub const RS_PUB_KEY.*#pub const RS_PUB_KEY: \&str = "BL+o1E0O+6uzMd7la5DaNzptRxd95Fd3TgcGvWIqDUM=";#' "$CONFIG"
 
 # 3) 应用名（同时决定安装目录/服务名）
 sedi 's#RwLock::new("RustDesk".to_owned())#RwLock::new("维巧远程".to_owned())#' "$CONFIG"
@@ -73,7 +73,7 @@ grep -n 'if false' "$PLATFORM"
 
 # 强校验：核心三项必须命中，否则中断构建（避免产出连不上服务器的包）
 grep -q 'rust.wt20.top' "$CONFIG" || { echo 'ERROR: 服务器注入失败'; exit 1; }
-grep -q 'RS_PUB_KEY: &str = "ENXMLoBSWEQJJt0/LSggQ2UE3fSmzVJvfxd0t5Gpkyc="' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
+grep -q 'RS_PUB_KEY: &str = "BL+o1E0O+6uzMd7la5DaNzptRxd95Fd3TgcGvWIqDUM="' "$CONFIG" || { echo 'ERROR: Key 注入失败'; exit 1; }
 grep -q '维巧远程' "$CONFIG" || { echo 'ERROR: 应用名注入失败'; exit 1; }
 grep -q 'PROD_RENDEZVOUS_SERVER: RwLock<String> = RwLock::new("rust.wt20.top"' "$CONFIG" || { echo 'ERROR: API 自动推导(PROD_RENDEZVOUS_SERVER)注入失败'; exit 1; }
 
